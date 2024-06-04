@@ -43,8 +43,12 @@ class Maze:
 
     def __init__(self, size: int):
         self.size = size
+
         self.length_counter = int(self.size * 2) 
+        self.timer_counter = int(self.size * 4)
         self.counting = 0
+        self.timer_counting = 0
+
         self.picked = [] 
         self.unpicked = []
         self.cells = []
@@ -76,16 +80,25 @@ def create_maze(maze_size: int) -> Maze:
 
 def generate_maze(gen_state: str, maze: Maze, counter: int) -> str:
 
-    print(f" Counter: {maze.counting}")
+    print(f" Timer Counter: {maze.timer_counting}")
     
     if maze.counting > maze.length_counter and len(maze.picked) < 2:
         gen_state = 'SetPath'
         maze.counting = 0 
+        maze.timer_counting = 0
+
+    if maze.timer_counting > maze.timer_counter and len(maze.picked) > 2:
+        gen_state = 'ResetPath'
+        maze.counting = 0
+        maze.timer_counting = 0
+
+    maze.timer_counting += 1
 
     match gen_state:
         case 'Init':
             return pick_start_cell(maze) 
         case 'StartPath':
+            maze.timer_counting = 0
             return pick_start_path(maze, counter)
         case 'RandomDir':
             return random_dir_move(maze, counter)
@@ -94,7 +107,6 @@ def generate_maze(gen_state: str, maze: Maze, counter: int) -> str:
         case 'Finished':
             return 'Finished'
         case 'SetPath':
-            maze.counting += 1
             return set_path(maze)
 
 
@@ -193,8 +205,9 @@ def reset_path(maze: Maze) -> str:
     for y in range(len(maze.cells)):
         for x in range(len(maze.cells[y])):
 
-            maze.cells[y][x].convert_connections(Cell.WALL)
-            maze.cells[y][x].type = Cell.WALL
+            if maze.cells[y][x].type in [Cell.TEMP, Cell.POINT]:
+                maze.cells[y][x].convert_connections(Cell.WALL)
+                maze.cells[y][x].type = Cell.WALL
 
     maze.pointer = None
     maze.prev = None

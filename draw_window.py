@@ -67,7 +67,7 @@ def show_grid_console(grid: list) -> None:
         print(row)
     print()
 
-def update(canvas: Canvas, state:str, grid:list,  maze: Maze, cell_length: int, counter: int) -> str:
+def update(canvas: Canvas, state:str, grid:list,  maze: Maze, cell_length: int, counter: int, maze_speed_generation:int) -> str:
     canvas.delete("all")
 
     state = generate_maze(state, maze, counter)
@@ -76,11 +76,15 @@ def update(canvas: Canvas, state:str, grid:list,  maze: Maze, cell_length: int, 
     grid = set_grid(maze)
     draw_grid(canvas, grid, cell_length)
 
-    canvas.after(1, update, canvas, state, grid, maze, cell_length, counter)
+    if state != 'Finished':
+        canvas.after(maze_speed_generation, update, canvas, state, grid, maze, cell_length, counter, maze_speed_generation)
+    else:
+        print("Maze Generation Finished")
 
 def main() -> None:
-    cell_length = 20
-    my_maze = create_maze(20)
+    cell_length = 5
+    my_maze = create_maze(50)
+    maze_speed_generation = 10 
 
     state = 'Init'
     _counter = 0 
@@ -94,13 +98,13 @@ def main() -> None:
     canvas = Canvas(root, width=grid_size, height=grid_size, background='gray75')
     canvas.grid(column=0, row=0, sticky=(N, W, E, S))
 
-    canvas.after(500, update, canvas, state, my_grid, my_maze, cell_length, _counter)
+    canvas.after(maze_speed_generation, update, canvas, state, my_grid, my_maze, cell_length, _counter, maze_speed_generation)
 
     root.mainloop()
 
-if __name__ == "__main__":
-    #main()
-    cell_length = 3 
+def main_without_show() -> None:
+
+    cell_length = 4 
 
     my_maze = create_maze(100)
 
@@ -123,10 +127,11 @@ if __name__ == "__main__":
     
     draw_grid(canvas, my_grid, cell_length)
 
-    #set_default_walls(my_grid)
-    #canvas.after(500, update, canvas, "Init", my_grid, my_maze, cell_length)
-
     root.mainloop()
+
+if __name__ == "__main__":
+    #main()
+    main_without_show()
 
 
 
